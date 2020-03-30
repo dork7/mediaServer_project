@@ -1,0 +1,4 @@
+node_modules/
+electron_wp/node_modules/
+/electron_wp/node_modules/
+electron_wp\node_modules
