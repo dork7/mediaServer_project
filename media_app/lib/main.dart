@@ -8,7 +8,7 @@ import 'package:connectivity/connectivity.dart';
 
 void main() {
   runApp(MaterialApp(
-    //debugShowCheckedModeBanner: false,
+    debugShowCheckedModeBanner: false,
     title: 'Calcoolater',
     home: App(),
     theme: ThemeData(
@@ -82,15 +82,15 @@ class _AppState extends State<App> {
     SystemChannels.lifecycle.setMessageHandler((msg) {
       print('RESUMMMMMMMED messageb $msg');
       if (msg.contains('resumed')) {
-              print('part 2');
+        print('part 2');
         _getSharedData().then((d) {
           if (d.isEmpty) return;
-          
+
           // Your logic here
           // E.g. at this place you might want to use Navigator to launch a new page and pass the shared data
         });
       }
-    }); 
+    });
 
     // Case 2: App is started by the intent:
     // Call Java MethodHandler on application start up to check for shared data
@@ -115,6 +115,17 @@ class _AppState extends State<App> {
 
   Future _loadHttpData(String ip, String reqURL) async {
     final results = await mwebService().sendRequest(ip, reqURL);
+    setState(() {
+      print(results);
+      mResponse = results;
+
+      // _dataSet = results;
+    });
+    return results;
+  }
+
+  Future _killCommand(String ip) async {
+    final results = await mwebService().sendRequest(ip, 'KILL_app');
     setState(() {
       print(results);
       mResponse = results;
@@ -211,7 +222,37 @@ class _AppState extends State<App> {
                   ],
                 ),
               ),
+              Padding(
+                // kill button
+                padding: EdgeInsets.all(_mMargin),
+                child: Row(
+                  children: <Widget>[
+                    // buttons
+                    Expanded(
+                      child: RaisedButton(
+                        color: Colors.red[700],
+                        child: Text(
+                          'KILL',
+                          // style: textStyle,
+                          textScaleFactor: 1.5,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            mResponse = "";
+                            _killCommand(currentSelected);
+                            // _getIP();
+                            //   _getIPAdresses();
+                            //  _loadHttpData(currentSelected, controller1.text);
+                            // displayResult = _calculatetotalReturns();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // adding the text field for displaying the results
+              Divider(color: Colors.white),
               Padding(
                 padding: EdgeInsets.all(_mMargin),
                 child: Text(
@@ -219,13 +260,15 @@ class _AppState extends State<App> {
                   style: textStyle,
                 ),
               ),
+              Divider(color: Colors.white),
               Padding(
                 padding: EdgeInsets.all(_mMargin),
                 child: Text(
                   this.mIntent,
                   style: textStyle,
                 ),
-              )
+              ),
+              Divider(color: Colors.white),
             ],
           ),
         ));
