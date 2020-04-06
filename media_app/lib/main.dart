@@ -60,7 +60,7 @@ class _AppState extends State<App> {
     print('+++++++++++++++++++++++++++++++++++++++ $wifiIP');
     //final String ip = await Wifi.ip;
     final String subnet = wifiIP.substring(0, wifiIP.lastIndexOf('.'));
-    final int port = 3000;
+    final int port = 2266;
 
     final stream = NetworkAnalyzer.discover2(subnet, port);
     stream.listen((NetworkAddress addr) {
@@ -70,8 +70,8 @@ class _AppState extends State<App> {
         if (ipList.contains('No Network found')) {
           ipList.removeAt(0);
         }
-        ipList.insert(0, addr.ip.toString() + ':3000');
-        currentSelected = addr.ip.toString() + ':3000';
+        ipList.insert(0, addr.ip.toString() + ':2266');
+        currentSelected = addr.ip.toString() + ':2266';
       }
     });
   }

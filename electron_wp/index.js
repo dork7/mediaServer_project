@@ -6,7 +6,7 @@ var expressAPP = express()
 
 // PORT automatically setting
 // env variaable is set in bash using `export PORT=5000`
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 2266;
 
  
   let winYoutube;
