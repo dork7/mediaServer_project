@@ -34,6 +34,7 @@ class _AppState extends State<App> {
 
   String mResponse = "Response";
   String mIntent = "Intent here";
+  String srchingIp = "-";
   final _mMargin = 5.0;
   var currentSelected = "";
   List<String> ipList = ['No Network found'];
@@ -56,16 +57,25 @@ class _AppState extends State<App> {
     } on PlatformException catch (e) {
       print(e.toString());
       wifiIP = "Failed to get Wifi IP";
+      setState(() {
+        srchingIp = "Failed to get Wifi IP";
+      });
     }
     print('+++++++++++++++++++++++++++++++++++++++ $wifiIP');
+
     //final String ip = await Wifi.ip;
     final String subnet = wifiIP.substring(0, wifiIP.lastIndexOf('.'));
     final int port = 2266;
-
+    setState(() {
+      srchingIp = 'Searching on => $port';
+    });
     final stream = NetworkAnalyzer.discover2(subnet, port);
     stream.listen((NetworkAddress addr) {
       if (addr.exists) {
-        print('Found device: ${addr.ip}');
+        //  print('Found device: ${addr.ip}');
+        setState(() {
+          srchingIp = 'Found';
+        });
         // ipList.add(addr.ip.toString()+':3000');
         if (ipList.contains('No Network found')) {
           ipList.removeAt(0);
@@ -74,6 +84,10 @@ class _AppState extends State<App> {
         currentSelected = addr.ip.toString() + ':2266';
       }
     });
+  }
+
+  void _refreshIPAdresses() async {
+    print("+++++++++++++++++++refresh list+++++++++++++++++++");
   }
 
   _init() async {
@@ -129,6 +143,9 @@ class _AppState extends State<App> {
     setState(() {
       print(results);
       mResponse = results;
+      setState(() {
+        mIntent = 'Kill Command';
+      });
 
       // _dataSet = results;
     });
@@ -195,6 +212,43 @@ class _AppState extends State<App> {
                   ],
                 ),
               ),
+              Padding(
+                padding: EdgeInsets.all(_mMargin),
+                child: Text(
+                  this.srchingIp,
+                  style: textStyle,
+                ),
+              ),
+              // refreshing IP address
+              Padding(
+                padding: EdgeInsets.all(_mMargin),
+                child: Row(
+                  children: <Widget>[
+                    // buttons
+                    Expanded(
+                      child: RaisedButton(
+                        color: Theme.of(context).primaryColor,
+                        child: Text(
+                          'Refresh',
+                          // style: textStyle,
+                          textScaleFactor: 1.5,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            // mResponse = "";
+                            // _getIP();
+                            _getIPAdresses();
+                            //   _refreshIPAdresses();
+                            //   _loadHttpData(currentSelected, controller1.text);
+                            // displayResult = _calculatetotalReturns();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Padding(
                 padding: EdgeInsets.all(_mMargin),
                 child: Row(

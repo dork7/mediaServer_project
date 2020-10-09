@@ -5,8 +5,9 @@ import 'package:http/http.dart' as http;
 
 class mwebService {
   Future<String> sendRequest(String mIp, String mURL) async {
-    // mIp = "192.168.10.11:3000";
-    String url = "http://"+mIp+"?url="+mURL+"";
+    print("send request called");
+    //mIp = "10.60.1.152:2266"; // add systems ip
+    String url = "http://" + mIp + "?url=" + mURL + "";
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
@@ -17,5 +18,4 @@ class mwebService {
     var retrunVal = jsonDecode(response.body);
     return retrunVal['url'];
   }
- 
 }
