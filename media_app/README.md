@@ -17,3 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 
 
 # building flutter app => flutter clean ; flutter build appbundle --target-platform android-arm,android-arm64
+
+
+# port used
+## port = 2266;
