@@ -1,10 +1,11 @@
 {
-  "name": "electron_wp",
+  "name": "media-server",
   "version": "1.0.0",
   "description": "Media server that opens URLs and YouTube videos in Electron windows via HTTP requests",
   "main": "index.js",
   "scripts": {
     "start": "electron .",
+    "dev": "nodemon index.js",
     "browser": "node to_run_in_browser/index.js",
     "package": "electron-packager . --asar"
   },

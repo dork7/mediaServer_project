@@ -5,7 +5,6 @@ A lightweight media server built with Electron and Express.js. It accepts HTTP r
 ## Quick Start
 
 ```bash
-cd electron_wp
 npm install
 npm start
 ```
@@ -28,7 +27,6 @@ Once running, send HTTP GET requests to control it:
 If you don't need Electron windows and just want to open URLs in your default browser:
 
 ```bash
-cd electron_wp
 npm run browser
 ```
 
@@ -39,6 +37,5 @@ This starts a server on port **3000** that opens URLs in your system's default b
 To create a standalone executable:
 
 ```bash
-cd electron_wp
 npm run package
 ```
