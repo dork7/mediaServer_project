@@ -1,70 +1,83 @@
+# @host = localhost:2266
+@host = 192.168.0.136:2266
+
 ### Check server status
-GET http://localhost:2266/
+GET http://{{host}}/
 
 ###
 
 ### Open a YouTube video
-GET http://localhost:2266/?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ
+GET http://{{host}}/?url=https://www.youtube.com/watch?v=2fONEL2Udwo
 
 ###
 
 ### Open a YouTube short link
-GET http://localhost:2266/?url=https://youtu.be/dQw4w9WgXcQ
+GET http://{{host}}/?url=https://youtu.be/dQw4w9WgXcQ
 
 ###
 
 ### Play another video (switches in same window)
-GET http://localhost:2266/?url=https://www.youtube.com/watch?v=jNQXAC9IVRw
+GET http://{{host}}/?url=https://www.youtube.com/watch?v=jNQXAC9IVRw
 
 ###
 
 ### Open a non-YouTube URL
-GET http://localhost:2266/?url=https://www.google.com
+GET http://{{host}}/?url=https://www.google.com
 
 ###
 
 ### Set volume to 50%
-GET http://localhost:2266/volume?level=50
+GET http://{{host}}/volume?level=50
 
 ###
 
 ### Set volume to max
-GET http://localhost:2266/volume?level=100
+GET http://{{host}}/volume?level=100
 
 ###
 
 ### Mute volume
-GET http://localhost:2266/volume?level=0
+GET http://{{host}}/volume?level=0
+
+###
+
+### Set system volume to max (Linux/macOS)
+GET http://{{host}}/volume?level=100&system=true
+
+###
+
+### Set system volume to 50% (Linux/macOS)
+GET http://{{host}}/volume?level=50&system=true
 
 ###
 
 ### Toggle mute
-GET http://localhost:2266/mute
+GET http://{{host}}/mute
 
 ###
 
 ### Pause video
-GET http://localhost:2266/pause
+GET http://{{host}}/pause
 
 ###
 
 ### Resume video
-GET http://localhost:2266/resume
+GET http://{{host}}/resume
 
 ###
 
 ### Toggle fullscreen
-GET http://localhost:2266/fullscreen
+GET http://{{host}}/fullscreen
 
 ###
 
 ### Close the media window
-GET http://localhost:2266/?url=KILL_app
+GET http://{{host}}/?url=KILL_app
 
 ###
 
 ### POST request
-POST http://localhost:2266/
+POST http://{{host}}/
 Content-Type: application/json
 
 {

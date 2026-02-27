@@ -1,0 +1,273 @@
+{
+	"info": {
+		"name": "Media Server",
+		"description": "API collection for the Electron Media Server running on port 2266",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:2266"
+		},
+		{
+			"key": "baseUrlLan",
+			"value": "http://192.168.0.136:2266"
+		},
+		{
+			"key": "baseUrl",
+			"value": "http://100.101.20.41:2266"
+		}
+	],
+	"item": [
+		{
+			"name": "Server",
+			"item": [
+				{
+					"name": "Check server status",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/"
+					}
+				},
+				{
+					"name": "POST request",
+					"request": {
+						"method": "POST",
+						"url": "{{baseUrl}}/",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"hello from client\"\n}"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Open URL",
+			"item": [
+				{
+					"name": "Open a YouTube video",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/?url=https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+							"host": ["{{baseUrl}}"],
+							"path": [""],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Open a YouTube short link",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/?url=https://youtu.be/dQw4w9WgXcQ",
+							"host": ["{{baseUrl}}"],
+							"path": [""],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://youtu.be/dQw4w9WgXcQ"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Play another video",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/?url=https://www.youtube.com/watch?v=jNQXAC9IVRw",
+							"host": ["{{baseUrl}}"],
+							"path": [""],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://www.youtube.com/watch?v=jNQXAC9IVRw"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Open a non-YouTube URL",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/?url=https://www.google.com",
+							"host": ["{{baseUrl}}"],
+							"path": [""],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://www.google.com"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Close the media window",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/?url=KILL_app",
+							"host": ["{{baseUrl}}"],
+							"path": [""],
+							"query": [
+								{
+									"key": "url",
+									"value": "KILL_app"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Playback Controls",
+			"item": [
+				{
+					"name": "Pause video",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/pause"
+					}
+				},
+				{
+					"name": "Resume video",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/resume"
+					}
+				},
+				{
+					"name": "Toggle fullscreen",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/fullscreen"
+					}
+				}
+			]
+		},
+		{
+			"name": "Volume Controls",
+			"item": [
+				{
+					"name": "Set volume to 50%",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/volume?level=50",
+							"host": ["{{baseUrl}}"],
+							"path": ["volume"],
+							"query": [
+								{
+									"key": "level",
+									"value": "50"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Set volume to max",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/volume?level=100",
+							"host": ["{{baseUrl}}"],
+							"path": ["volume"],
+							"query": [
+								{
+									"key": "level",
+									"value": "100"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mute volume",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/volume?level=0",
+							"host": ["{{baseUrl}}"],
+							"path": ["volume"],
+							"query": [
+								{
+									"key": "level",
+									"value": "0"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Toggle mute",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/mute"
+					}
+				},
+				{
+					"name": "Set system volume to max (Linux/macOS)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/volume?level=100&system=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["volume"],
+							"query": [
+								{
+									"key": "level",
+									"value": "100"
+								},
+								{
+									"key": "system",
+									"value": "true"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Set system volume to 50% (Linux/macOS)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/volume?level=50&system=true",
+							"host": ["{{baseUrl}}"],
+							"path": ["volume"],
+							"query": [
+								{
+									"key": "level",
+									"value": "50"
+								},
+								{
+									"key": "system",
+									"value": "true"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

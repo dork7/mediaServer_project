@@ -1,5 +1,6 @@
 const { app, BrowserWindow, session } = require('electron')
 const express = require('express')
+const { exec } = require('child_process')
 
 const expressAPP = express()
 expressAPP.use(express.json())
@@ -74,9 +75,30 @@ function createWindow() {
 
   expressAPP.get('/volume', (req, res) => {
     const level = parseInt(req.query.level, 10)
+    const system = req.query.system
 
-    if (isNaN(level) || level < 0 || level > 100) {
-      return res.status(400).json({ status: 'error', message: 'Pass ?level=0 to ?level=100' })
+    if (isNaN(level) || level < 0 ) {
+      return res.status(400).json({ status: 'error', message: 'Pass ?level=0 to ?level=100. Add &system=true for system volume.' })
+    }
+
+    if (system === 'true') {
+      const cmd = process.platform === 'linux'
+        ? `amixer set Master ${level}%`
+        : process.platform === 'darwin'
+          ? `osascript -e "set volume output volume ${level}"`
+          : null
+
+      if (!cmd) {
+        return res.status(400).json({ status: 'error', message: 'System volume not supported on this platform' })
+      }
+
+      exec(cmd, (err) => {
+        if (err) {
+          return res.status(500).json({ status: 'error', message: 'Failed to set system volume', detail: err.message })
+        }
+        res.json({ status: 'ok', systemVolume: level })
+      })
+      return
     }
 
     if (!winYoutube) {
