@@ -2,14 +2,36 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
-    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <title>Media Server</title>
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #1a1a2e;
+        color: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+      }
+      .container { padding: 2rem; }
+      h1 { font-size: 1.4rem; color: #00d4ff; margin-bottom: 0.5rem; }
+      p { font-size: 0.9rem; color: #888; }
+      .port { color: #00d4ff; font-weight: bold; }
+    </style>
   </head>
   <body>
-    <h1>Hello World!</h1>
-    We are using node <script>document.write(process.versions.node)</script>,
-    Chrome <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+    <div class="container">
+      <h1>Media Server Running</h1>
+      <p>Listening on port <span class="port" id="port"></span></p>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem;">
+        Send GET requests to <code>/?url=YOUR_URL</code>
+      </p>
+    </div>
+    <script>
+      document.getElementById('port').textContent = process.env.PORT || '2266';
+    </script>
   </body>
 </html>

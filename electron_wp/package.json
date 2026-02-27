@@ -1,19 +1,20 @@
 {
   "name": "electron_wp",
   "version": "1.0.0",
-  "description": "",
+  "description": "Media server that opens URLs and YouTube videos in Electron windows via HTTP requests",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "browser": "node to_run_in_browser/index.js",
+    "package": "electron-packager . --asar"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^8.2.0"
+    "electron": "^28.0.0",
+    "electron-packager": "^17.1.2"
   },
   "dependencies": {
-    "electron-packager": "^14.2.1",
-    "express": "^4.17.1",
-    "jquery": "^3.4.1"
+    "express": "^4.21.0"
   }
 }

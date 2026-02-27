@@ -1,115 +1,108 @@
-const { app, BrowserWindow } = require('electron')
-var express = require('express')
-var $ = require('jQuery');
- 
-var expressAPP = express()
+const { app, BrowserWindow, session } = require('electron')
+const express = require('express')
 
-// PORT automatically setting
-// env variaable is set in bash using `export PORT=5000`
-const port = process.env.PORT || 2266;
+const expressAPP = express()
+expressAPP.use(express.json())
 
- 
-  let winYoutube;
+const port = process.env.PORT || 2266
 
-function createWindow () {
+const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-  expressAPP.listen(port, ()=>{console.log(`listennign port ${port} ..........`);});
+let winYoutube
 
-
-    expressAPP.get('/', (req, res)=>{
-    
-    var url = req.query.url;
-    console.log(url);
-
- 
-
-  if( url == 'KILL_app'){
-    if (winYoutube)
-     { winYoutube.close();
-           winYoutube = null;
-     }
-  }
-  else if( url.includes("youtuzz")) {
-    if (!winYoutube)
-    {  
-    winYoutube = new BrowserWindow({
-   
-          //frame: false,
-          webPreferences: {
-            nodeIntegration: true
-          }
-      })
-     winYoutube.maximize();
-     //winYoutube.loadURL(url);
-    }
-    var videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/);
-    if(videoid[1] != "") {
-      console.log("video id = ",videoid[1]);
-      winYoutube.loadURL('https://www.youtube.com/embed/'+videoid[1]+'?rel=0&autoplay=1');
-    } 
-
-    else { 
-        console.log("The youtube url is not valid.");
-    }
-     
-    //win.loadURL('https://www.youtube.com/embed/VIDEO_ID');
-    }
-    else {
-    console.log("else");
-    if (!winYoutube)
-    {  
-    winYoutube = new BrowserWindow({
-   
-          //frame: false,
-          webPreferences: {
-            nodeIntegration: true
-          }
-      })
-     winYoutube.maximize();
-     winYoutube.loadURL(url);
-    }
-
-    }
-
-  //  winYoutube.setFullScreen(false);
-    var response = { 'appRun' : 'status' , 'url' : url};
-    console.log(response);
-    res.send(response);
-
-  });
-
-  expressAPP.post('/' , (req , res ) => {
-
-    // validate the input 
-    // const result = validateCourse(req.body);
-    
-    console.log("post req");
-
-});
-
-
-  // Create the browser window.
-  let win = new BrowserWindow({
-    width: 200,
-    height: 200,
-   // frame: false,
+function createMediaWindow() {
+  const win = new BrowserWindow({
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: false,
+      contextIsolation: true,
+      autoplayPolicy: 'no-user-gesture-required'
+    }
+  })
+  win.maximize()
+  win.on('closed', () => { winYoutube = null })
+  win.webContents.setUserAgent(CHROME_UA)
+  return win
+}
+
+function createWindow() {
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    if (details.url.includes('youtube.com') || details.url.includes('googlevideo.com')) {
+      details.requestHeaders['Referer'] = 'https://www.youtube.com/'
+    }
+    callback({ requestHeaders: details.requestHeaders })
+  })
+
+  expressAPP.listen(port, () => {
+    console.log(`Media server listening on port ${port}`)
+  })
+
+  expressAPP.get('/', (req, res) => {
+    const url = req.query.url
+
+    if (!url) {
+      return res.json({ status: 'running', message: 'Media server is up. Pass ?url=<URL> to open a page.' })
+    }
+
+    console.log('Received URL:', url)
+
+    if (url === 'KILL_app') {
+      if (winYoutube) {
+        winYoutube.close()
+        winYoutube = null
+      }
+      return res.json({ status: 'closed', message: 'Window closed' })
+    }
+
+    if (url.includes('youtu')) {
+      if (!winYoutube) {
+        winYoutube = createMediaWindow()
+      }
+
+      const videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
+      if (videoid && videoid[1]) {
+        console.log('Video ID:', videoid[1])
+        winYoutube.loadURL('https://www.youtube.com/watch?v=' + videoid[1])
+      } else {
+        winYoutube.loadURL(url)
+      }
+    } else {
+      if (!winYoutube) {
+        winYoutube = createMediaWindow()
+      }
+      winYoutube.loadURL(url)
+    }
+
+    res.json({ status: 'opened', url: url })
+  })
+
+  expressAPP.post('/', (req, res) => {
+    console.log('POST request body:', req.body)
+    res.json({ status: 'received', body: req.body })
+  })
+
+  const win = new BrowserWindow({
+    width: 400,
+    height: 300,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
     }
   })
 
-    win.hide(); 
- // win.setFullScreen(true);
-
-
-  // win.loadURL('https://www.youtube.com/embed/I96uPDifZ1w?rel=0&autoplay=1');
-
-  // and load the index.html of the app.
- 
-
-
+  win.loadFile('index.html')
+  win.hide()
 }
 
-
-
 app.whenReady().then(createWindow)
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow()
+  }
+})
