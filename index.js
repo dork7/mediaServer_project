@@ -9,6 +9,13 @@ expressAPP.use(express.json())
 
 const port = process.env.PORT || 2266
 
+const killChromium = () => {
+  exec('pkill chromium', (err) => {
+    console.log('pkill chromium: ', err)
+    if (err) console.log('pkill chromium: no matching processes or error')
+  })
+}
+
 const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 let winYoutube
@@ -126,7 +133,7 @@ function createWindow() {
     if (!url) {
       return res.json({ status: 'running', message: 'Media server is up. Pass ?url=<URL> to open a page.' })
     }
-
+killChromium()
     console.log('Received URL:', url)
 
     if (url === 'KILL_app') {
