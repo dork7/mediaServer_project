@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Health check",
+    "url": "https://httpbin.org/get",
+    "method": "GET",
+    "headers": {},
+    "body": null,
+    "intervalSeconds": 30,
+    "createdAt": "2026-03-01T11:00:54.870Z"
+  },
+  {
+    "id": 2,
+    "name": "Health check",
+    "url": "https://httpbin.org/get",
+    "method": "GET",
+    "headers": {},
+    "body": null,
+    "intervalSeconds": 5,
+    "createdAt": "2026-03-01T11:01:08.984Z"
+  }
+]

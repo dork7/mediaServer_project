@@ -1,6 +1,8 @@
 const { app, BrowserWindow, session } = require('electron')
 const express = require('express')
 const { exec } = require('child_process')
+const fs = require('fs')
+const path = require('path')
 
 const expressAPP = express()
 expressAPP.use(express.json())
@@ -10,6 +12,86 @@ const port = process.env.PORT || 2266
 const CHROME_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 let winYoutube
+const cronJobs = new Map()
+let cronJobIdCounter = 1
+const CRON_FILE = path.join(__dirname, 'cron-jobs.json')
+
+function saveCronConfig() {
+  const configs = []
+  for (const [, job] of cronJobs) {
+    const { intervalHandle, lastRun, lastStatus, lastError, runCount, ...config } = job
+    configs.push(config)
+  }
+  fs.writeFileSync(CRON_FILE, JSON.stringify(configs, null, 2))
+}
+
+function loadCronConfig() {
+  try {
+    if (fs.existsSync(CRON_FILE)) {
+      return JSON.parse(fs.readFileSync(CRON_FILE, 'utf-8'))
+    }
+  } catch (err) {
+    console.error('Failed to load cron config:', err.message)
+  }
+  return []
+}
+
+function startCronJob(config) {
+  const { id, name, url, method, headers = {}, body, intervalSeconds, createdAt } = config
+  const fetchOptions = { method, headers: { ...headers } }
+  if (body && method !== 'GET') {
+    fetchOptions.body = JSON.stringify(body)
+    if (!fetchOptions.headers['Content-Type']) {
+      fetchOptions.headers['Content-Type'] = 'application/json'
+    }
+  }
+
+  const execute = async () => {
+    try {
+      const response = await fetch(url, fetchOptions)
+      const job = cronJobs.get(id)
+      if (job) {
+        job.lastRun = new Date().toISOString()
+        job.lastStatus = response.status
+        job.lastError = null
+        job.runCount++
+      }
+      console.log(`[Cron #${id}] ${method} ${url} -> ${response.status}`)
+    } catch (err) {
+      const job = cronJobs.get(id)
+      if (job) {
+        job.lastRun = new Date().toISOString()
+        job.lastStatus = 'error'
+        job.lastError = err.message
+        job.runCount++
+      }
+      console.error(`[Cron #${id}] ${method} ${url} -> ERROR: ${err.message}`)
+    }
+  }
+
+  const intervalHandle = setInterval(execute, intervalSeconds * 1000)
+
+  cronJobs.set(id, {
+    id, name, url, method, headers,
+    body: body || null, intervalSeconds, intervalHandle,
+    createdAt: createdAt || new Date().toISOString(),
+    lastRun: null, lastStatus: null, lastError: null, runCount: 0
+  })
+
+  console.log(`[Cron #${id}] Started "${name}" — ${method} ${url} every ${intervalSeconds}s`)
+}
+
+function restoreCronJobs() {
+  const configs = loadCronConfig()
+  if (configs.length === 0) return
+  console.log(`Restoring ${configs.length} cron job(s) from ${CRON_FILE}`)
+  for (const config of configs) {
+    startCronJob(config)
+    if (config.id >= cronJobIdCounter) {
+      cronJobIdCounter = config.id + 1
+    }
+  }
+}
 
 function createMediaWindow() {
   const win = new BrowserWindow({
@@ -35,6 +117,7 @@ function createWindow() {
 
   expressAPP.listen(port, () => {
     console.log(`Media server listening on port ${port}`)
+    restoreCronJobs()
   })
 
   expressAPP.get('/', (req, res) => {
@@ -194,6 +277,60 @@ function createWindow() {
   expressAPP.post('/', (req, res) => {
     console.log('POST request body:', req.body)
     res.json({ status: 'received', body: req.body })
+  })
+
+  expressAPP.post('/cron', (req, res) => {
+    const { url, method = 'GET', headers = {}, body, intervalSeconds, name } = req.body
+
+    if (!url || !intervalSeconds) {
+      return res.status(400).json({ status: 'error', message: 'url and intervalSeconds are required' })
+    }
+    if (intervalSeconds < 1) {
+      return res.status(400).json({ status: 'error', message: 'intervalSeconds must be at least 1' })
+    }
+
+    const id = cronJobIdCounter++
+    const config = {
+      id, name: name || `Job #${id}`, url, method, headers,
+      body: body || null, intervalSeconds,
+      createdAt: new Date().toISOString()
+    }
+
+    startCronJob(config)
+    saveCronConfig()
+
+    res.json({ status: 'created', id: config.id, name: config.name, intervalSeconds, url, method })
+  })
+
+  expressAPP.get('/cron', (req, res) => {
+    const jobs = []
+    for (const [, job] of cronJobs) {
+      const { intervalHandle, ...rest } = job
+      jobs.push(rest)
+    }
+    res.json({ status: 'ok', count: jobs.length, jobs })
+  })
+
+  expressAPP.delete('/cron/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10)
+    const job = cronJobs.get(id)
+    if (!job) {
+      return res.status(404).json({ status: 'error', message: `Cron job #${id} not found` })
+    }
+    clearInterval(job.intervalHandle)
+    cronJobs.delete(id)
+    saveCronConfig()
+    res.json({ status: 'deleted', id, name: job.name })
+  })
+
+  expressAPP.delete('/cron', (req, res) => {
+    const count = cronJobs.size
+    for (const [, job] of cronJobs) {
+      clearInterval(job.intervalHandle)
+    }
+    cronJobs.clear()
+    saveCronConfig()
+    res.json({ status: 'deleted', count })
   })
 
   const win = new BrowserWindow({

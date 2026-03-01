@@ -83,3 +83,45 @@ Content-Type: application/json
 {
   "message": "hello from client"
 }
+
+###
+
+### Create a cron job (hits an API every 30 seconds)
+POST http://{{host}}/cron
+Content-Type: application/json
+
+{
+  "name": "Health check",
+  "url": "https://httpbin.org/get",
+  "method": "GET",
+  "intervalSeconds": 30
+}
+
+###
+
+### Create a cron job with POST method and body
+POST http://{{host}}/cron
+Content-Type: application/json
+
+{
+  "name": "Post data every minute",
+  "url": "https://httpbin.org/post",
+  "method": "POST",
+  "body": { "key": "value" },
+  "intervalSeconds": 60
+}
+
+###
+
+### List all cron jobs
+GET http://{{host}}/cron
+
+###
+
+### Delete a cron job (replace 1 with actual job id)
+DELETE http://{{host}}/cron/1
+
+###
+
+### Delete all cron jobs
+DELETE http://{{host}}/cron

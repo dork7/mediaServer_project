@@ -246,28 +246,88 @@
 						}
 					}
 				},
-				{
-					"name": "Set system volume to 50% (Linux/macOS)",
-					"request": {
-						"method": "GET",
-						"url": {
-							"raw": "{{baseUrl}}/volume?level=50&system=true",
-							"host": ["{{baseUrl}}"],
-							"path": ["volume"],
-							"query": [
-								{
-									"key": "level",
-									"value": "50"
-								},
-								{
-									"key": "system",
-									"value": "true"
-								}
-							]
-						}
+			{
+				"name": "Set system volume to 50% (Linux/macOS)",
+				"request": {
+					"method": "GET",
+					"url": {
+						"raw": "{{baseUrl}}/volume?level=50&system=true",
+						"host": ["{{baseUrl}}"],
+						"path": ["volume"],
+						"query": [
+							{
+								"key": "level",
+								"value": "50"
+							},
+							{
+								"key": "system",
+								"value": "true"
+							}
+						]
 					}
 				}
-			]
-		}
-	]
+			}
+		]
+	},
+	{
+		"name": "Cron Jobs",
+		"item": [
+			{
+				"name": "Create a cron job (GET every 30s)",
+				"request": {
+					"method": "POST",
+					"url": "{{baseUrl}}/cron",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n  \"name\": \"Health check\",\n  \"url\": \"https://httpbin.org/get\",\n  \"method\": \"GET\",\n  \"intervalSeconds\": 30\n}"
+					}
+				}
+			},
+			{
+				"name": "Create a cron job (POST every 60s)",
+				"request": {
+					"method": "POST",
+					"url": "{{baseUrl}}/cron",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n  \"name\": \"Post data every minute\",\n  \"url\": \"https://httpbin.org/post\",\n  \"method\": \"POST\",\n  \"body\": { \"key\": \"value\" },\n  \"intervalSeconds\": 60\n}"
+					}
+				}
+			},
+			{
+				"name": "List all cron jobs",
+				"request": {
+					"method": "GET",
+					"url": "{{baseUrl}}/cron"
+				}
+			},
+			{
+				"name": "Delete a cron job",
+				"request": {
+					"method": "DELETE",
+					"url": "{{baseUrl}}/cron/1"
+				}
+			},
+			{
+				"name": "Delete all cron jobs",
+				"request": {
+					"method": "DELETE",
+					"url": "{{baseUrl}}/cron"
+				}
+			}
+		]
+	}
+]
 }
