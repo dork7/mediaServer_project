@@ -137,6 +137,7 @@ function createWindow() {
         winYoutube = null
       }
       exec('pkill -f chromium', (err) => {
+        console.log('pkill chromium: ', err)
         if (err) console.log('pkill chromium: no matching processes or error')
       })
       return res.json({ status: 'closed', message: 'Window closed' })
