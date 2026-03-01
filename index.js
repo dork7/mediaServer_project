@@ -131,7 +131,9 @@ function createWindow() {
 
     if (url === 'KILL_app') {
       if (winYoutube) {
-        winYoutube.close()
+        if (!winYoutube.isDestroyed()) {
+          winYoutube.destroy()
+        }
         winYoutube = null
       }
       return res.json({ status: 'closed', message: 'Window closed' })
