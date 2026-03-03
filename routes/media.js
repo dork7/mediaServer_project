@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const { exec } = require('child_process')
 const { getWindow, setWindow, createMediaWindow } = require('../windowManager')
+const { log } = require('../logger')
 
 const router = Router()
 
@@ -10,6 +11,8 @@ router.get('/', (req, res) => {
   if (!url) {
     return res.json({ status: 'running', message: 'Media server is up. Pass ?url=<URL> to open a page.' })
   }
+
+  log('media.log', { method: 'GET', url, query: req.query })
 
   exec('pkill chromium', (err) => {
     if (err) console.log('pkill chromium: no matching processes or error')
@@ -52,6 +55,7 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', (req, res) => {
+  log('media.log', { method: 'POST', body: req.body })
   console.log('POST request body:', req.body)
   res.json({ status: 'received', body: req.body })
 })

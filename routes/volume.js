@@ -1,12 +1,15 @@
 const { Router } = require('express')
 const { exec } = require('child_process')
 const { getWindow } = require('../windowManager')
+const { log } = require('../logger')
 
 const router = Router()
 
 router.get('/volume', (req, res) => {
   const level = parseInt(req.query.level, 10)
   const system = req.query.system
+
+  log('volume.log', { method: 'GET', route: '/volume', query: req.query, level, system })
 
   if (isNaN(level) || level < 0) {
     return res.status(400).json({ status: 'error', message: 'Pass ?level=0 to ?level=100. Add &system=true for system volume.' })
@@ -56,6 +59,7 @@ router.get('/volume', (req, res) => {
 })
 
 router.get('/mute', (req, res) => {
+  log('volume.log', { method: 'GET', route: '/mute' })
   const win = getWindow()
   if (!win) {
     return res.status(404).json({ status: 'error', message: 'No media window open' })
