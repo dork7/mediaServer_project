@@ -107,6 +107,37 @@ router.post('/cron', (req, res) => {
 
   res.json({ status: 'created', id: config.id, name: config.name, intervalSeconds, url, method })
 })
+const SERVER =  'http://localhost:2266'
+
+router.post('/cron/batch', (req, res) => {
+  const { urls, intervalSeconds = 10 } = req.body
+
+  if (!Array.isArray(urls) || urls.length === 0) {
+    return res.status(400).json({ status: 'error', message: 'urls array is required' })
+  }
+
+  const created = []
+  for (const entry of urls) {
+    let url = typeof entry === 'string' ? entry : entry.url
+    const seconds = (typeof entry === 'object' && entry.intervalSeconds) || intervalSeconds
+
+    url = SERVER + '/?url=' + url
+
+    if (!url) continue
+
+    const id = cronJobIdCounter++
+    const config = {
+      id, name: `Job #${id}`, url, method: 'GET', headers: {},
+      body: null, intervalSeconds: seconds,
+      createdAt: new Date().toISOString()
+    }
+    startCronJob(config)
+    created.push({ id, url, intervalSeconds: seconds })
+  }
+
+  saveCronConfig()
+  res.json({ status: 'created', count: created.length, jobs: created })
+})
 
 router.get('/cron', (req, res) => {
   const jobs = []

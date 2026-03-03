@@ -113,6 +113,35 @@ Content-Type: application/json
 
 ###
 
+### Batch create cron jobs (simple array of URLs, default 10s interval)
+POST http://{{host}}/cron/batch
+Content-Type: application/json
+
+{
+  "urls": [
+    "https://httpbin.org/get",
+    "https://httpbin.org/ip",
+    "https://httpbin.org/user-agent"
+  ]
+}
+
+###
+
+### Batch create with custom intervals per URL
+POST http://{{host}}/cron/batch
+Content-Type: application/json
+
+{
+  "urls": [
+    { "url": "https://httpbin.org/get", "intervalSeconds": 15 },
+    { "url": "https://httpbin.org/ip", "intervalSeconds": 30 },
+    "https://httpbin.org/user-agent"
+  ],
+  "intervalSeconds": 20
+}
+
+###
+
 ### List all cron jobs
 GET http://{{host}}/cron
 

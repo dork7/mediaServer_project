@@ -307,6 +307,23 @@
 				}
 			},
 			{
+				"name": "Batch create cron jobs",
+				"request": {
+					"method": "POST",
+					"url": "{{baseUrl}}/cron/batch",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": "{\n  \"urls\": [\n    \"https://httpbin.org/get\",\n    { \"url\": \"https://httpbin.org/ip\", \"intervalSeconds\": 30 },\n    \"https://httpbin.org/user-agent\"\n  ],\n  \"intervalSeconds\": 10\n}"
+					}
+				}
+			},
+			{
 				"name": "List all cron jobs",
 				"request": {
 					"method": "GET",
