@@ -1,0 +1,5 @@
+{
+  "watch": ["index.js", "routes/", "windowManager.js", "logger.js", "to_run_in_browser/"],
+  "ignore": ["logs/", "cron-jobs.json", "node_modules/"],
+  "ext": "js,json,html"
+}

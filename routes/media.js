@@ -56,8 +56,10 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   log('media.log', { method: 'POST', body: req.body })
-  console.log('POST request body:', req.body)
   res.json({ status: 'received', body: req.body })
 })
 
 module.exports = router
+
+
+  

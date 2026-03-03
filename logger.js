@@ -9,7 +9,7 @@ if (!fs.existsSync(LOG_DIR)) {
 function log(filename, entry) {
   const filePath = path.join(LOG_DIR, filename)
   const timestamp = new Date().toISOString()
-  const line = JSON.stringify({ timestamp, ...entry }) + '\n'
+  const line = JSON.stringify({ timestamp, ...entry }) + '\n' + '--------------------------------' + '\n'
   fs.appendFileSync(filePath, line)
 }
 

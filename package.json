@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "dev": "Xvfb :99 -screen 0 1024x768x24 & DISPLAY=:0 electron .",
+    "dev": "Xvfb :99 -screen 0 1024x768x24 & DISPLAY=:99 nodemon --exec electron .",
+    "dev:browser": "nodemon to_run_in_browser/index.js",
     "browser": "node to_run_in_browser/index.js",
     "package": "electron-packager . --asar"
   },
@@ -13,7 +14,8 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^28.0.0",
-    "electron-packager": "^17.1.2"
+    "electron-packager": "^17.1.2",
+    "nodemon": "^3.1.14"
   },
   "dependencies": {
     "express": "^4.21.0"
