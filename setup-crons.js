@@ -1,41 +1,30 @@
-const SERVER =  'http://localhost:2266'
+const SERVER = 'http://localhost:2266'
 
-const jobs = [
-  {
-    name: 'Post data every minute',
-    url: '/',
-    method: 'POST',
-    body: { key: 'value' },
-    intervalSeconds: 10
-  },
-  // Add more jobs here:
-  // {
-  //   name: 'Health check',
-  //   url: 'https://httpbin.org/get',
-  //   method: 'GET',
-  //   intervalSeconds: 30
-  // },
+const urls = [
+  { url: 'https://www.youtube.com/shorts/a-1lZvvTNOs', intervalSeconds: 30 },
+  { url: 'https://www.youtube.com/shorts/a-1lZvvTNOs', intervalSeconds: 30 },
+  // Add more URLs here:
+  // 'https://httpbin.org/get',
+  // { url: 'https://httpbin.org/ip', intervalSeconds: 60 },
 ]
 
-async function createCronJob(job) {
-  try {
-    const res = await fetch(`${SERVER}/cron`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(job)
-    })
-    const data = await res.json()
-    console.log(`[OK] ${job.name} -> id: ${data.id}`)
-  } catch (err) {
-    console.error(`[FAIL] ${job.name} -> ${err.message}`)
-  }
-}
+const defaultInterval = 10
 
 async function main() {
-  console.log(`Creating ${jobs.length} cron job(s) on ${SERVER}...\n`)
-  for (const job of jobs) {
-    job.url = SERVER + job.url
-    await createCronJob(job)
+  console.log(`Creating ${urls.length} cron job(s) on ${SERVER}...\n`)
+  try {
+    const res = await fetch(`${SERVER}/cron/batch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls, intervalSeconds: defaultInterval })
+    })
+    const data = await res.json()
+    console.log(`[OK] Created ${data.count} job(s):`)
+    for (const job of data.jobs) {
+      console.log(`  #${job.id} -> ${job.url} every ${job.intervalSeconds}s`)
+    }
+  } catch (err) {
+    console.error(`[FAIL] ${err.message}`)
   }
   console.log('\nDone.')
 }

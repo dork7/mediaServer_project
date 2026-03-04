@@ -110,7 +110,7 @@ router.post('/cron', (req, res) => {
 const SERVER =  'http://localhost:2266'
 
 router.post('/cron/batch', (req, res) => {
-  const { urls, intervalSeconds = 10 } = req.body
+  const { urls, intervalSeconds = 10 , autoKill = false} = req.body
 
   if (!Array.isArray(urls) || urls.length === 0) {
     return res.status(400).json({ status: 'error', message: 'urls array is required' })
@@ -132,6 +132,12 @@ router.post('/cron/batch', (req, res) => {
       createdAt: new Date().toISOString()
     }
     startCronJob(config)
+    if (autoKill) {
+ 
+    }
+
+    
+
     created.push({ id, url, intervalSeconds: seconds })
   }
 
