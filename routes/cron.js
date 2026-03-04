@@ -28,8 +28,17 @@ function loadCronConfig() {
   return []
 }
 
+function stopAndRemoveJob(id) {
+  const job = cronJobs.get(id)
+  if (!job) return
+  clearInterval(job.intervalHandle)
+  cronJobs.delete(id)
+  saveCronConfig()
+  console.log(`[Cron #${id}] Finished (runOnce) — removed`)
+}
+
 function startCronJob(config) {
-  const { id, name, url, method, headers = {}, body, intervalSeconds, createdAt } = config
+  const { id, name, url, method, headers = {}, body, intervalSeconds, runOnce = true, createdAt } = config
   const fetchOptions = { method, headers: { ...headers } }
   if (body && method !== 'GET') {
     fetchOptions.body = JSON.stringify(body)
@@ -59,18 +68,23 @@ function startCronJob(config) {
       }
       console.error(`[Cron #${id}] ${method} ${url} -> ERROR: ${err.message}`)
     }
+
+    if (runOnce) stopAndRemoveJob(id)
   }
 
-  const intervalHandle = setInterval(execute, intervalSeconds * 1000)
+  const intervalHandle = runOnce
+    ? setTimeout(execute, intervalSeconds * 1000)
+    : setInterval(execute, intervalSeconds * 1000)
 
   cronJobs.set(id, {
     id, name, url, method, headers,
-    body: body || null, intervalSeconds, intervalHandle,
+    body: body || null, intervalSeconds, runOnce, intervalHandle,
     createdAt: createdAt || new Date().toISOString(),
     lastRun: null, lastStatus: null, lastError: null, runCount: 0
   })
 
-  console.log(`[Cron #${id}] Started "${name}" — ${method} ${url} every ${intervalSeconds}s`)
+  const mode = runOnce ? `once after ${intervalSeconds}s` : `every ${intervalSeconds}s`
+  console.log(`[Cron #${id}] Started "${name}" — ${method} ${url} ${mode}`)
 }
 
 function restoreCronJobs() {
@@ -86,7 +100,7 @@ function restoreCronJobs() {
 }
 
 router.post('/cron', (req, res) => {
-  const { url, method = 'GET', headers = {}, body, intervalSeconds, name } = req.body
+  let { url, method = 'GET', headers = {}, body, intervalSeconds, name, runOnce = false } = req.body
 
   if (!url || !intervalSeconds) {
     return res.status(400).json({ status: 'error', message: 'url and intervalSeconds are required' })
@@ -95,31 +109,39 @@ router.post('/cron', (req, res) => {
     return res.status(400).json({ status: 'error', message: 'intervalSeconds must be at least 1' })
   }
 
+  url = SERVER + '/?url=' + url
+
   const id = cronJobIdCounter++
   const config = {
     id, name: name || `Job #${id}`, url, method, headers,
-    body: body || null, intervalSeconds,
+    body: body || null, intervalSeconds, runOnce,
     createdAt: new Date().toISOString()
   }
 
   startCronJob(config)
   saveCronConfig()
 
-  res.json({ status: 'created', id: config.id, name: config.name, intervalSeconds, url, method })
+  res.json({ status: 'created', id: config.id, name: config.name, intervalSeconds, runOnce, url, method })
 })
 const SERVER =  'http://localhost:2266'
 
 router.post('/cron/batch', (req, res) => {
-  const { urls, intervalSeconds = 10 , autoKill = false} = req.body
+  const { urls, intervalSeconds = 10, runOnce = false } = req.body
 
   if (!Array.isArray(urls) || urls.length === 0) {
     return res.status(400).json({ status: 'error', message: 'urls array is required' })
   }
 
+  for (const [, job] of cronJobs) {
+    job.runOnce ? clearTimeout(job.intervalHandle) : clearInterval(job.intervalHandle)
+  }
+  cronJobs.clear()
+
   const created = []
   for (const entry of urls) {
     let url = typeof entry === 'string' ? entry : entry.url
     const seconds = (typeof entry === 'object' && entry.intervalSeconds) || intervalSeconds
+    const once = (typeof entry === 'object' && entry.runOnce !== undefined) ? entry.runOnce : runOnce
 
     url = SERVER + '/?url=' + url
 
@@ -128,17 +150,12 @@ router.post('/cron/batch', (req, res) => {
     const id = cronJobIdCounter++
     const config = {
       id, name: `Job #${id}`, url, method: 'GET', headers: {},
-      body: null, intervalSeconds: seconds,
+      body: null, intervalSeconds: seconds, runOnce: once,
       createdAt: new Date().toISOString()
     }
     startCronJob(config)
-    if (autoKill) {
- 
-    }
 
-    
-
-    created.push({ id, url, intervalSeconds: seconds })
+    created.push({ id, url, intervalSeconds: seconds, runOnce: once })
   }
 
   saveCronConfig()
@@ -160,7 +177,7 @@ router.delete('/cron/:id', (req, res) => {
   if (!job) {
     return res.status(404).json({ status: 'error', message: `Cron job #${id} not found` })
   }
-  clearInterval(job.intervalHandle)
+  job.runOnce ? clearTimeout(job.intervalHandle) : clearInterval(job.intervalHandle)
   cronJobs.delete(id)
   saveCronConfig()
   res.json({ status: 'deleted', id, name: job.name })
@@ -169,7 +186,7 @@ router.delete('/cron/:id', (req, res) => {
 router.delete('/cron', (req, res) => {
   const count = cronJobs.size
   for (const [, job] of cronJobs) {
-    clearInterval(job.intervalHandle)
+    job.runOnce ? clearTimeout(job.intervalHandle) : clearInterval(job.intervalHandle)
   }
   cronJobs.clear()
   saveCronConfig()
