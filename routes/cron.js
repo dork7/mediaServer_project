@@ -193,4 +193,4 @@ router.delete('/cron', (req, res) => {
   res.json({ status: 'deleted', count })
 })
 
-module.exports = { router, restoreCronJobs }
+module.exports = { router, restoreCronJobs, cronJobs, getCronJobId: () => cronJobIdCounter++, startCronJob, saveCronConfig }

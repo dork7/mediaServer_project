@@ -5,6 +5,7 @@ const mediaRoutes = require('./routes/media')
 const playbackRoutes = require('./routes/playback')
 const volumeRoutes = require('./routes/volume')
 const { router: cronRoutes, restoreCronJobs } = require('./routes/cron')
+const scheduleRoutes = require('./routes/schedule')
 
 const expressAPP = express()
 expressAPP.use(express.json())
@@ -15,6 +16,7 @@ expressAPP.use(mediaRoutes)
 expressAPP.use(playbackRoutes)
 expressAPP.use(volumeRoutes)
 expressAPP.use(cronRoutes)
+expressAPP.use(scheduleRoutes)
 
 function createWindow() {
   session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
