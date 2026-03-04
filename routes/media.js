@@ -40,8 +40,13 @@ router.get('/', (req, res) => {
   }
 
   if (url.includes('youtu')) {
+    const shortsMatch = url.match(/youtube\.com\/shorts\/([^\s?&]+)/)
     const videoid = url.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)
-    if (videoid && videoid[1]) {
+
+    if (shortsMatch && shortsMatch[1]) {
+      console.log('Shorts Video ID:', shortsMatch[1])
+      win.loadURL('https://www.youtube.com/shorts/' + shortsMatch[1])
+    } else if (videoid && videoid[1]) {
       console.log('Video ID:', videoid[1])
       win.loadURL('https://www.youtube.com/watch?v=' + videoid[1])
     } else {
