@@ -11,11 +11,6 @@ router.post('/schedule', (req, res) => {
     return res.status(400).json({ status: 'error', message: 'urls array is required' })
   }
 
-  for (const [, job] of cronJobs) {
-    job.runOnce ? clearTimeout(job.intervalHandle) : clearInterval(job.intervalHandle)
-  }
-  cronJobs.clear()
-
   const now = new Date()
   const scheduled = []
 
