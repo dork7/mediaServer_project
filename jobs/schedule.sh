@@ -9,6 +9,22 @@ curl --location 'http://localhost:2266/schedule' \
         },
         
         {
+            "url": "https://www.youtube.com/shorts/SvxuzoxEL48",
+            "time": "1504"
+        },
+        {
+            "url": "https://www.youtube.com/shorts/SvxuzoxEL48",
+            "time": "1620"
+        },
+        {
+            "url": "https://www.youtube.com/shorts/SvxuzoxEL48",
+            "time": "1935"
+        },
+        {
+            "url": "https://www.youtube.com/shorts/SvxuzoxEL48",
+            "time": "2235"
+        },
+        {
             "url": "https://www.youtube.com/watch?v=gaA2Eyhxjg8",
             "time": "1504"
         },
