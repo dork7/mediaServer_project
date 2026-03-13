@@ -5,11 +5,11 @@ curl --location 'http://localhost:2266/cron/batch' \
     "urls": [
         {
             "url": "http://localhost:2266/?url=KILL_app",
-            "intervalSeconds": 100
+            "intervalSeconds": 260
         },
            {
             "url": "https://www.youtube.com/watch?v=oGl00PA_NgQ,
-            "intervalSeconds": 20
+            "intervalSeconds": 3600
         },
         {
             "url": "https://www.youtube.com/watch?v=gaA2Eyhxjg8",
@@ -46,7 +46,7 @@ curl --location 'http://localhost:2266/cron/batch' \
         },
         {
             "url": "https://www.youtube.com/shorts/ghopXR2bgYc",
-            "intervalSeconds": 180,
+            "intervalSeconds": 1800,
             "runOnce": false
         },
         {
@@ -104,7 +104,14 @@ curl --location 'http://localhost:2266/cron/batch' \
         {
             "url": "https://www.youtube.com/shorts/ZhhtrqArhQA",
             "intervalSeconds": 18000
+        },
+             {
+            "url": "http://localhost:2266/volume?level=50&system=true",
+            "intervalSeconds": 360
+        }, {
+            "url": "http://localhost:2266/volume?level=70&system=true",
+            "intervalSeconds": 500
         }
-    ],
+            ],
     "intervalSeconds": 10
 }'
