@@ -2,7 +2,6 @@
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="mediaserver"
-SCRIPT="${PROJECT_DIR}/to_run_in_browser/index.js"
 
 echo "=== PM2 Setup for Media Server ==="
 
@@ -17,13 +16,11 @@ fi
 # Stop existing instance if running
 pm2 delete "$APP_NAME" 2>/dev/null
 
-# Start the app
-echo "Starting $APP_NAME..."
-PORT=2266 pm2 start "$SCRIPT" \
+# Start the app using yarn dev
+echo "Starting $APP_NAME with yarn dev..."
+pm2 start "yarn dev" \
     --name "$APP_NAME" \
     --cwd "$PROJECT_DIR" \
-    --watch \
-    --ignore-watch="node_modules logs cron-jobs.json mediaserver.log .git" \
     --max-restarts=10 \
     --restart-delay=3000
 
