@@ -3,6 +3,42 @@
 SERVICE_NAME="mediaserver"
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_FILE="${PROJECT_DIR}/mediaserver.log"
+REPO_URL="https://github.com/dork7/mediaServer_project.git"
+
+fresh_install() {
+    echo "Cleaning old files and installing from fresh code..."
+
+    # Save cron config if it exists
+    local cron_backup=""
+    if [[ -f "${PROJECT_DIR}/cron-jobs.json" ]]; then
+        cron_backup=$(cat "${PROJECT_DIR}/cron-jobs.json")
+    fi
+
+    # Remove everything except .git and this script
+    find "${PROJECT_DIR}" -mindepth 1 \
+        ! -path "${PROJECT_DIR}/.git" \
+        ! -path "${PROJECT_DIR}/.git/*" \
+        ! -path "${PROJECT_DIR}/startup.sh" \
+        ! -path "${PROJECT_DIR}/mediaserver.log" \
+        -delete 2>/dev/null
+
+    # Pull fresh code
+    cd "${PROJECT_DIR}"
+    git fetch origin
+    git reset --hard origin/main
+    git clean -fd
+
+    # Install dependencies
+    npm install --production
+
+    # Restore cron config
+    if [[ -n "$cron_backup" ]]; then
+        echo "$cron_backup" > "${PROJECT_DIR}/cron-jobs.json"
+        echo "Restored cron-jobs.json"
+    fi
+
+    echo "Fresh install complete."
+}
 
 if [[ "$(uname)" == "Darwin" ]]; then
     # ─── macOS (Launch Agent) ───
@@ -11,6 +47,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
     ELECTRON_PATH="${PROJECT_DIR}/node_modules/.bin/electron"
 
     install() {
+        fresh_install
         cat > "$PLIST_PATH" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -66,6 +103,7 @@ else
     NODE_PATH="$(which node)"
 
     install() {
+        fresh_install
         sudo bash -c "cat > ${SERVICE_FILE}" <<EOF
 [Unit]
 Description=Media Server
@@ -110,9 +148,10 @@ fi
 case "$1" in
     install)   install ;;
     uninstall) uninstall ;;
+    fresh)     fresh_install ;;
     status)    status ;;
     *)
-        echo "Usage: ./startup.sh {install|uninstall|status}"
+        echo "Usage: ./startup.sh {install|uninstall|fresh|status}"
         exit 1
         ;;
 esac
